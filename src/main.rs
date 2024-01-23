@@ -8,7 +8,8 @@ fn main() {
         user_id: String::from("1"),
         email: String::from("1"),
     };
-    println!(" user id is {} and email is {}", stream.user_id, stream.email); 
-
-
+    println!(
+        " user id is {} and email is {}",
+        stream.user_id, stream.email
+    );
 }
