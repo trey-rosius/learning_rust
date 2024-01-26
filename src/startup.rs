@@ -5,17 +5,17 @@ use actix_web::{web, App, HttpServer};
 
 use crate::routes::{health_check, subscribe};
 
-use sqlx::PgConnection;
+use sqlx::PgPool;
 
 
 pub fn run(listener: TcpListener,
-connection:PgConnection) -> Result<Server, std::io::Error> {
-    let connection = web::Data::new(connection);
+db_pool:PgPool) -> Result<Server, std::io::Error> {
+    let db_pool = web::Data::new(db_pool);
     let server = HttpServer::new(move|| {
 App::new()
     .service(health_check)
     .service(subscribe)
-    .app_data(connection.clone())
+    .app_data(db_pool.clone())
     })
         
         .listen(listener)?
