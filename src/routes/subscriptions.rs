@@ -1,7 +1,7 @@
 use actix_web::{post, web, HttpResponse, Responder};
+use chrono::Utc;
 use serde::Deserialize;
 use sqlx::PgPool;
-use chrono::Utc; 
 use uuid::Uuid;
 #[derive(Deserialize)]
 struct FormData {
@@ -10,10 +10,20 @@ struct FormData {
 }
 
 #[post("/subscriptions")]
-async fn subscribe(web::Form(form): web::Form<FormData>,
-pool:web::Data<PgPool>) -> impl Responder {
+async fn subscribe(
+    web::Form(form): web::Form<FormData>,
+    pool: web::Data<PgPool>,
+) -> impl Responder {
+    // We are using the same interpolation syntax of `println`/`print` here! log::info!(
 
-   match sqlx::query!(
+    log::info!(
+        "Adding '{}' '{}' as a new subscriber.",
+        form.email,
+        form.name
+    );
+    log::info!("Saving new subscriber details in the database");
+
+    match sqlx::query!(
         r#"
         INSERT INTO subscriptions (id,email, name,subscribed_at) VALUES($1,$2,$3,$4)
         "#,
@@ -21,18 +31,18 @@ pool:web::Data<PgPool>) -> impl Responder {
         form.email,
         form.name,
         Utc::now()
-        
     )
     .execute(pool.get_ref())
-    .await{
-    Ok(_) => HttpResponse::Ok().finish(),
-    Err(e) => {
-        println!("Failed to execute query: {}", e);
-        HttpResponse::InternalServerError().finish()
-    },
-}
-        
+    .await
+    {
+        Ok(_) => {
+            log::info!("New subscriber details have been saved");
+
+            HttpResponse::Ok().finish()
+        }
+        Err(e) => {
+            log::error!("Failed to execute query: {:?}", e);
+            HttpResponse::InternalServerError().finish()
+        }
     }
-    
-
-
+}
