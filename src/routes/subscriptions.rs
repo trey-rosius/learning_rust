@@ -16,12 +16,14 @@ async fn subscribe(
 ) -> impl Responder {
     // We are using the same interpolation syntax of `println`/`print` here! log::info!(
 
-    log::info!(
-        "Adding '{}' '{}' as a new subscriber.",
+        let request_id = Uuid::new_v4();
+    tracing::info!(
+        "request_id {} - Adding '{}' '{}' as a new subscriber.",
+        request_id,
         form.email,
-        form.name
+        form.name,
     );
-    log::info!("Saving new subscriber details in the database");
+    tracing::info!("request_id: {} - Saving new subscriber details in the database ",request_id);
 
     match sqlx::query!(
         r#"
@@ -36,12 +38,13 @@ async fn subscribe(
     .await
     {
         Ok(_) => {
-            log::info!("New subscriber details have been saved");
+            tracing::info!("request_id: {} New subscriber details have been saved",request_id);
 
             HttpResponse::Ok().finish()
         }
         Err(e) => {
-            log::error!("Failed to execute query: {:?}", e);
+            tracing::error!("request_id: {} - Failed to execute query: {:?}", request_id,
+            e);
             HttpResponse::InternalServerError().finish()
         }
     }
