@@ -2,8 +2,8 @@ use actix_web::{post, web, HttpResponse, Responder};
 use chrono::Utc;
 use serde::Deserialize;
 use sqlx::PgPool;
-use uuid::Uuid;
 use tracing::Instrument;
+use uuid::Uuid;
 #[derive(Deserialize)]
 struct FormData {
     email: String,
@@ -17,7 +17,7 @@ async fn subscribe(
 ) -> impl Responder {
     // We are using the same interpolation syntax of `println`/`print` here! log::info!(
 
-        let request_id = Uuid::new_v4();
+    let request_id = Uuid::new_v4();
     let request_span = tracing::info_span!(
         "Adding a new subscriber",
         %request_id,
@@ -42,13 +42,19 @@ async fn subscribe(
     .await
     {
         Ok(_) => {
-            tracing::info!("request_id: {} New subscriber details have been saved",request_id);
+            tracing::info!(
+                "request_id: {} New subscriber details have been saved",
+                request_id
+            );
 
             HttpResponse::Ok().finish()
         }
         Err(e) => {
-            tracing::error!("request_id: {} - Failed to execute query: {:?}", request_id,
-            e);
+            tracing::error!(
+                "request_id: {} - Failed to execute query: {:?}",
+                request_id,
+                e
+            );
             HttpResponse::InternalServerError().finish()
         }
     }
