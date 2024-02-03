@@ -13,6 +13,10 @@ static TRACING: Lazy<()> = Lazy::new(|| {
         let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::stdout);
 
         init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::sink);
+
+        init_subscriber(subscriber);
     }
 });
 pub struct TestApp {
@@ -22,7 +26,6 @@ pub struct TestApp {
 #[tokio::test]
 async fn health_check_works() {
     //Arrange
-
     let test_app = spawn_app().await;
 
     let client = reqwest::Client::new();
